@@ -1,0 +1,16 @@
+#lang racket
+
+(require "table.rkt")
+
+(define attach-tag cons)
+(define tag-type car)
+(define contents cdr)
+
+(define make-circle
+  (lambda (r)
+    (attach-tag 'circle r)))
+
+(define make-square
+  (lambda (s)
+    (attach-tag 'square s)))
+

@@ -1,0 +1,42 @@
+
+REWRITING INTERPRETER
+
+e[e'/x]
+
+(Function x -> Function y -> (x + x + y)) 5
+               Function y -> (5 + 5 + y)
+
+(Function z -> e) v
+        e[v/z]  in e, substitute v for all free z
+
+
+(Function x -> e) e'
+e [e'/x]        only substitute free x (free in e)
+
+
+(Function x -> e) [v/x] = Function x -> e
+(Function x -> e) [v/y] = Function x -> e[v/y]  (y != x)
+
+
+TRIVIAL CASES
+e = True | False | integer 
+e[v/x] = e  (no x in e to substitute)
+
+COMBINING EXPRS: plus, minus, equal, and, or
+(e1 + e2)[v/x] = e1[v/x] + e2[v/x]
+
+COMBINING EXPRS: if, appl
+(If e1 Then e2 Else e3) [v/x] ==> If e1[v/x] Then e2[v/x] Else e3[v/x]
+(Appl e1 e2) [v/x] ==> Appl e1[v/x] e2[v/x]
+
+COMBINING EXPRS: letrec
+        Let Rec sum n = 
+          If n == 0
+          Then 0
+          Else n + sum (n-1)
+        In sum 10
+
+(Letrec f x = e1 In e2) [v/y] (y!=f,x) ==> Letrec f x = e1[v/y] In e2[v/y]
+                        [v/x] (x!=f) ==> Letrec f x = e1 In e2[v/x]
+                        [v/f] (f!=x) ==> Letrec f x = e1 In e2
+                                (f and x are never equal, f is never free)

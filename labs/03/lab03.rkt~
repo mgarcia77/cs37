@@ -1,0 +1,198 @@
+d;; Lab 03
+
+;; The text (page 58;
+;; http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-12.html#%_idx_990)
+;; provides a recursive process definition of sum:
+
+(define sum
+  (lambda (term a next b)
+    (if (> a b)
+        0
+        (+ (term a) 
+           (sum term (next a) next b)))))
+
+;; 1. Read what the sum function does.  Then, write an iterative
+;; process version of sum called sum-i which has the same interface as
+;; the function sum above. (This is Exercise 1.30)
+
+
+
+
+
+
+;; 2. Adapted from Exercise 1.31: Write a recursive (product-r) and
+;; iterative (product-i) version of product.  Then, define factorial in
+;; terms product (either version since they should produce the same
+;; answer given the same parameters).
+
+
+
+
+
+#|
+3. The following is taken from the text, Exercise 1.32:
+
+"Accumulate takes as arguments the same term and range specifications
+as sum and product, together with a combiner procedure (of two
+arguments) that specifies how the current term is to be combined with
+the accumulation of the preceding terms and a null-value that
+specifies what base value to use when the terms run out. Write
+accumulate and show how sum and product can both be defined as simple
+calls to accumulate."
+
+Your job is to write a recursive process and an interative process
+solution for accumulate, called accumulate and accumulate-i,
+respectively.  Both functions should have the same interface:
+
+(accumulate combiner null-value term a next b)
+(accumulate-i combiner null-value term a next b)
+|#
+
+
+
+
+
+
+
+
+;; 4. Exercise 1.33 describes a function called filtered-accumulate.
+;; The description below is taken from exercise 1.33 but the questions
+;; are different.
+
+#|
+You can obtain an even more general version of accumulate (exercise
+1.32) by introducing the notion of a filter on the terms to be
+combined. That is, combine only those terms derived from values in the
+range that satisfy a specified condition. The resulting
+filtered-accumulate abstraction takes the same arguments as
+accumulate, together with an additional predicate of one argument that
+specifies the filter. 
+
+The function filtered-accumulate should have the following form:
+----> (accumulate combiner null-value term a next b filter)
+
+Write filtered-accumulate as a recursive process procedure. Show how
+to express the following using filtered-accumulate:
+
+a. the sum of the square-roots of the numbers that are divisible by 7
+in the interval a to b.  You may want to write a function called
+divisible-by-seven that returns true if it's argument is divisible by
+seven.  You will probably want to use the built-in functions modulo
+and sqrt in your solution.  (NOTE: Don't just use the term function to
+count by 7's. Instead, count by 1's but use the filter to only include
+values that are divisible by 7.)
+
+b. the product of all the positive integers less than n that are
+perfect squares (i.e., all positive integers i < n such that
+there exists some other positive integer j where j*j = i).  You can 
+accomplish this test using the built-in functions exact? and sqrt.
+
+|#
+
+
+
+
+
+;; 5.  Write a function called "make-exponentiator" which takes a
+;; single parameter, e (an exponent), and returns a function of one
+;; parameter, n, which it raises to the e-th power.  Use the Racket
+;; function expt to help in your solution.  (expt n e) raises n to the
+;; e-th power.  You only need to handle integer exponenets greater
+;; than or equal to 0.
+
+;; For example:
+;(define square (make-exponentiator 2))
+;(square 4) ;; => 16
+
+;(define cube-root (make-exponentiator 1/3))
+;(cube-root 27) ;; => 3.0
+
+
+
+;; 6. Complete exercise 1.41:
+
+#|
+Define a procedure double that takes a procedure of one argument as an
+argument and returns a procedure that applies the original procedure
+twice. For example, if add1 is a procedure that adds 1 to its
+argument, then (double add1) should be a procedure that adds 2.
+
+Before you have completed that, try to figure out what value is returned by:
+
+(((double (double double)) add1) 5)
+
+Explain why the result you got is the correct answer.
+|#
+
+
+
+
+
+
+
+;; 7. Complete exercise 1.42:
+
+#|
+Let f and g be two one-argument functions. The composition f after g
+is defined to be the function x --> f(g(x)). Define a procedure
+compose that implements composition. For example, if inc is a
+procedure that adds 1 to its argument,
+
+((compose square inc) 6)   ; --> (square (inc 6)) --> 49 
+|#
+
+
+
+
+
+;; 8. Complete exercise 1.43:
+
+
+#|
+If f is a numerical function and n is a positive integer, then we can
+form the nth repeated application of f, which is defined to be the
+function whose value at x is f(f(...(f(x))...)). For example, if f is
+the function x -> x + 1, then the nth repeated application of f is the
+function x -> x + n. If f is the operation of squaring a number, then the
+nth repeated application of f is the function that raises its argument
+to the (2^n)th power. Write a procedure that takes as input a procedure
+that computes f and a positive integer n and returns the procedure
+that computes the nth repeated application of f. Your procedure should
+be able to be used as follows:
+
+((repeated square 2) 5)  ; (square (square 5)) -> 625
+((repeated add1 5) 0)  ; (add1 (add1 (add1 (add1 (add1 0))))) -> 5
+
+Hint: You may find it convenient to use compose from exercise 1.42
+|#
+
+
+
+
+
+
+
+
+
+;; We will talk about "deep lists" and "deep recursion" on Tuesday.
+
+
+;9. Write a function called add1-to-each* which adds 1 to each element
+;of a deep list.
+
+; (add1-to-each* '(1 (2 3) (4 (5 6)))) ; --> (2 (3 4) (5 (6 7)))
+
+
+
+
+
+;10. Write a function called operate-on-each* which returns a function
+;that performs an operation on each element of a deep list.
+
+; (define double-each* (operate-on-each* (lambda (n) (* n 2))))
+; (double-each* '(1 (2 (3)))) ; --> (2 (4 (6)))
+
+
+
+
+

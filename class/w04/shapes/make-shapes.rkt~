@@ -1,0 +1,17 @@
+#lang racket
+
+(define attach-tag cons)
+(define tag-type car)
+(define contents cdr)
+
+(define make-integer
+  (lambda (n)
+    (attach-tag 'integer n)))
+
+(define make-rational
+  (lambda (n d)
+    (attach-tag 'rational (cons n d))))
+
+(define make-square
+  (lambda (s)
+    (attach-tag 'square s)))

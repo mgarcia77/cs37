@@ -1,0 +1,20 @@
+:
+data Boolexp = 
+    TRUE 
+  | FALSE 
+  | Not Boolexp
+  | And Boolexp Boolexp
+  | Or Boolexp Boolexp
+  | Implies Boolexp Boolexp
+  deriving (Show)
+
+eval :: Boolexp -> Boolexp
+
+eval TRUE = TRUE
+eval FALSE = FALSE
+eval (And e1 e2) = case (eval e1, eval e2) of  -- case statements evaluate
+                     (TRUE, TRUE) -> TRUE
+                     (_, _) -> FALSE
+eval (Or e1 e2) = case (eval e1, eval e2) of
+                    (FALSE, FALSE) -> FALSE
+                    (_, _) -> TRUE

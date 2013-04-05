@@ -1,0 +1,98 @@
+Operational semantics: defining interpreters
+
+e => v
+  e = expression, v = value
+
+values:         expressions:
+True            e_1 and e_2
+False           e_1 or e_2
+                e_1 implies e_2
+                not e
+
+statements of the form:
+
+  preconditions
+-----------------
+    if met
+
+
+a universal rule:
+
+< any conditions>
+      --------
+True And False => False
+
+
+more generic:
+
+<       >
+---------
+v1 And v2 => logical and of v1 and v2
+
+
+by the generic form:
+
+<       >
+---------
+True And False => False
+
+
+more complicated:
+
+<       >
+---------
+True And (True And False) =>
+
+trying to match (True And False) to v1, not possible
+
+
+recursive "and rule":
+
+e1 => v1    e2 => v2
+--------
+e1 And e1 => logical and of v1 and v2
+
+(similarly for Or and Implies)
+
+
+"not rule":
+e => v
+--------
+Not e => logical not of v
+
+
+"value rule":
+<       >
+---------
+v => v
+
+
+more complex:
+                                True => True
+                                -----------------
+True => True  False => False    Not True => False  False => False
+----------------------------    ---------------------------------
+(True And False) => False       ((Not True) And False) => False
+-----------------------------------------------------------------
+(True And False) Implies ((Not True) And False) => True
+
+reduce complex expressions down to basic components, and build back up
+
+
+
+abstract syntax tree:
+
+              Implies
+            /         \
+        And             And
+     /   |            /     \
+True    False       Not     False
+                    True
+
+
+turning abstract language into our working language
+[[True]] = True
+[[False]] = False
+[[Not e]] = (Not e)
+[[e1 And e2]] = (And e1 e2)
+(similarly for Or, Implies)

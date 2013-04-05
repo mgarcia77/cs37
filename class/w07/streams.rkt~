@@ -1,0 +1,258 @@
+#lang racket
+
+(require racket/trace)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-syntax-rule (delay-expression e)
+  (lambda () e))
+
+(define force-expression
+  (lambda (e)
+    (e)))
+
+(define-syntax-rule (scons x y)
+  (mcons x (delay-expression y)))
+
+(define scar
+  (lambda (s)
+    (mcar s)))
+
+(define scdr
+  (lambda (s)
+    (force-expression (mcdr s))))
+
+(define snull null)
+
+(define snull?
+  (lambda (s)
+    (eq? s snull)))
+
+;; Now let's define some streams
+
+;; Simple stream with one element
+(define lst-one (cons 1 null))
+(define str-one (scons 1 snull))
+
+(car lst-one) ; => 1
+(scar str-one) ; => 1
+
+(cdr lst-one) ; => ()
+(scdr str-one) ; => snull == '()
+
+;; Stream with 4 elements
+
+(define one-to-four (scons 1 (scons 2 (scons 3 (scons 4 snull)))))
+
+(scar one-to-four) ; => 1
+(scar (scdr one-to-four)) ; => 2
+
+
+;; enumerate creates a list of numbers starting at low and going to high
+(define enumerate
+  (lambda (low high)
+    (cond ((> low high) null)
+          (else
+           (cons low (enumerate (add1 low) high))))))
+
+(enumerate 1 5) ; => (1 2 3 4 5)
+
+;; first returns a list containing the first n values of lst
+(define first
+  (lambda (n lst)
+    (cond ((<= n 0) null)
+          (else
+           (cons (car lst) (first (sub1 n) (cdr lst)))))))
+
+;; this will return a list with the first 3 values of the list (1 2 3 ... 10)
+(first 3 (enumerate 1 10)) ; => (1 2 3)
+
+
+;; senumerate creates a stream of numbers starting at low and going to high
+(define plus1 (lambda (x) (add1 x))) ; we can't trace add1; we can trace this
+
+(define senumerate
+  (lambda (low high)
+    (cond ((> low high) snull)
+          (else
+           (scons low (senumerate (plus1 low) high))))))
+
+(senumerate 1 5) ; => (1 . <#procedure>)
+
+;; Question: What's is that procedure?
+;; Answer:   It's a procedure that generates all of the rest of the numbers 
+;;           in the stream.
+
+;; Question: Have the values been calculated yet?
+;; Answer:   No.
+
+;; Question: Why not?
+;; Answer:   Because the second argument to scons was put into a procedure
+;;           (lambda () (senumerate (add1 low) high)) which hasn't been called yet.
+
+;; Question: Can you show me a way I know for sure that these haven't been
+;;           calculated?
+;; Answer:   Yes, we can try two things which I'll show you below.
+
+;; If we were actually computing all trillion of these values, certainly
+;; it would take longer.
+(senumerate 1 1000000000000)
+            
+
+;; Another way is to trace the plus1 function so that we can see when plus1 is
+;; called.
+(trace plus1)
+(define s (senumerate 1 5))
+
+(display "Here's one call here to plus1:\n")
+(define t (scdr s))
+(display "Here's another call to plus1:\n")
+(define u (scdr t))
+(untrace plus1)
+
+;; sfirst is a useful function for turning the first n elements of a stream
+;; in a list so that you can view what is in the stream.
+(define sfirst
+  (lambda (n s)
+    (cond ((or (<= n 0) (snull? s)) null)
+          (else
+           (cons (scar s) (sfirst (sub1 n) (scdr s)))))))
+
+
+;; Try again with (trace plus1)
+(sfirst 3 (senumerate 1 5))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; BUILDING TOWARD INFINITE STREAMS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; We've previously written "simple map" which returns a new list 
+;; where "proc" has been applied to every element in "s".
+(define simple-map
+  (lambda (proc s)
+    (cond ((null? s) null)
+          (else
+           (cons (proc (car s)) (simple-map proc (cdr s)))))))
+
+(first 10 (simple-map add1 (enumerate 1 100)))
+
+; Let's define smap, which is simple map for streams:
+(define smap
+  (lambda (proc s)
+    (cond ((snull? s) snull)
+          (else
+           (scons (proc (scar s)) (smap proc (scdr s)))))))
+
+(sfirst 10 (smap add1 (senumerate 1 100)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Some ways for combining streams
+
+(define stream-combiner
+  (lambda (op)
+    (lambda (s1 s2)
+      (cond ((or (snull? s1) (snull? s2)) snull)
+            (else 
+             (scons (op (scar s1) (scar s2))
+                    ((stream-combiner op)
+                     (scdr s1) (scdr s2))))))))
+
+(define add-streams (stream-combiner +))
+(define sub-streams (stream-combiner -))
+(define mul-streams (stream-combiner *))
+
+(define squares (mul-streams (senumerate 1 10) (senumerate 1 10)))
+(sfirst 10 squares)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; INFINITE STREAMS
+
+; Stream of values from 0 to 100
+(define f (scons 0 (senumerate 1 100)))
+(sfirst 10 f)
+
+; Stream of values from 0 to infinity
+(define whole (scons 0 (smap add1 whole)))
+(sfirst 10 whole)
+
+;; How did that work?
+
+;; What other kinds of interesting infinite lists
+;; can we make?
+
+(define positives (scdr whole))
+(define negatives (smap - positives))
+(define ones (scons 1 ones))
+
+(define multiples-of-2 
+  (smap (lambda (x) (* 2 x)) positives))
+
+(define multiples-of-3
+  (smap (lambda (x) (* 3 x)) positives))
+
+;; We could also generate multiples-of-2 by mul-streams
+;; with twos and positives!
+(define twos (scons 2 twos))
+(define multiples-of-2-alt
+  (mul-streams twos positives))
+
+(define multiples-of-5
+  (add-streams multiples-of-2 multiples-of-3))
+
+; Generate the factorials
+(define factorials (scons 1 (mul-streams factorials positives)))
+
+; Generate the fibonacci numbers
+(define fibs (scons 1 (scons 1 (add-streams fibs (scdr fibs)))))
+
+;; foldl combines the values of the list "s" using "proc"
+;; with a base-case value "base".
+;; WE HAD PREVIOUSLY CALLED THIS 'ACCUMULATE' - foldl is built in.
+(define foldl
+  (lambda (proc base s)
+    (cond
+     ((null? s) base)
+     (else
+      (proc (car s) (foldl proc base (cdr s)))))))
+
+(foldl + 0 (enumerate 1 10))
+
+;; sfoldl folds the stream from the left.
+(define sfoldl
+  (lambda (proc base s)
+    (cond
+      ((snull? s) base)
+      (else
+       (proc (scar s) (sfoldl proc base (scdr s)))))))
+
+(sfoldl + 0 (senumerate 1 10))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; filter returns a list containing only the elements of the list s
+;; that pass the pred? test
+(define filter
+  (lambda (pred? s)
+    (cond ((null? s) null)
+          ((pred? (car s)) (cons (car s) (filter pred? (cdr s))))
+          (else
+           (filter pred? (cdr s))))))
+
+;; filter returns a stream containing only the elements of the stream
+;; s that pass the pred? test
+(define sfilter
+  (lambda (pred? s)
+    (cond ((snull? s) snull)
+          ((pred? (scar s)) (scons (scar s) (sfilter pred? (scdr s))))
+          (else 
+           (sfilter pred? (scdr s))))))
+

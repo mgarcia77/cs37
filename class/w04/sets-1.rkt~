@@ -1,0 +1,48 @@
+#lang racket
+
+; ****************************************************************************
+; SET OPERATIONS
+; (element? item set)      determines if the item is a member of the set
+; (adjoin item set)        adds the item to the set to create a new set
+; (intersection set1 set2) returns a set which contains only the items 
+;			   that are in both set1 and set2
+; (union set1 set2)        returns a set which contains all the items
+;                          that are in either set1 or set2
+; ****************************************************************************
+
+; OPTION 1: sets as unordered lists without duplicates
+
+; Here are two sample sets.  Once we had a data abstraction in
+; place, we would not construct sets in this way.  Rather, we
+; might want a function called list->set which would transform
+; a list of items into a set.  For now, though, we are focusing
+; on the above four functions, and how our choice of abstraction
+; impacts the implementation and performance of these functions
+
+(define set1 '(1 4 2 7 3))
+(define set2 '(1 9 4 8))
+
+(define element?
+  (lambda (item set)
+    (cond
+     ((null? set) #f)
+     ((= (car set) item) #t)
+     (else (element? item (cdr set))))))
+
+(define adjoin
+  (lambda (item set)
+    (if (element? item set)
+      set
+      (cons item set))))
+
+(define intersection
+  (lambda (s1 s2)
+    (cond
+     ((or (null? s1) (null? s2)) '())
+     ((element? (car s1) s2)
+      (adjoin (car s1) (intersection (cdr s1) s2)))
+     (else
+      (intersection (cdr s1) s2)))))
+
+
+; Complete union as an O(n^2) function

@@ -1,0 +1,69 @@
+#lang racket
+
+(require graphics/graphics)
+
+#|
+Introduction
+------------
+
+We begin by representing a point as a list of an x coordinate and a y
+coordinate, and we will represent a line segment as a list of a start
+point and an end point.
+
+On this abstraction of points and segments, we will create other
+abstractions such as polygons.  We will be able to display and animate
+the figures we create.
+
+In order to do graphics in Racket, you must include 
+(require graphics/graphics) at the top of your file as is done here.
+
+In order to draw, we will create a 500 x 500 canvas: the center of
+this canvas is the point (0,0), so the valid range of x and y
+coordinates is from -250 to 250.
+
+You are given the following graphics functions:
+
+(start-graphics): opens the graphics window with a blank canvas
+(end-graphics): closes the graphics window
+(draw-segment segment): draws a line segment in the graphics window
+(erase-segment segment): erases a line segment from the graphics window
+
+
+Implementation
+--------------
+All of the code for the graphics functions described above can be
+found in the file graphics.rkt which is provided. 
+
+Exercise 1a: 
+
+Execute the graphics.rkt file in Racket and then try the following:
+
+(define vertical-line 
+  (make-segment
+   (make-point 0 -250)
+   (make-point 0 0)))
+
+(define horizontal-line
+  (make-segment
+   (make-point -250 150)
+   (make-point 250 150)))
+
+(start-graphics)
+(draw-segment vertical-line)
+(draw-segment horizontal-line)
+
+You should see a vertical line (centered left-right in the window)
+which starts at the bottom and ends in the center, and a horizontal
+line (above the center of the window) which goes from the left side to
+the right side.  Change the coordinates of the horizontal line so that
+it ends halfway across the screen.
+
+Exercise 1b:
+
+To be sure that you understand the coordinate system, draw a square
+that has its lower left corner at the point (0,0) and each side has
+length 100.
+
+Complete the remaining exercises described in the graphics.rkt file.
+
+|#

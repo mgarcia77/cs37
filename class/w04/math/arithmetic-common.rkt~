@@ -1,0 +1,90 @@
+#lang racket
+
+; arithmetic-common.rkt
+
+;;; We assume all numbers are greater than or equal to zero.
+
+;;; --- load Level 1 implementation --- 
+
+(require "number-rep.rkt")
+
+;;;--------------- integer arithmetic: Level 2 -----------------
+
+;;; These definitions are independent of the particular representation
+;;; chosen for numbers:
+
+(define add
+  (lambda (a b)
+    (if (is-zero? b)
+        a
+        (inc (add a (dec b))))))
+
+(define sub
+  (lambda (a b)
+    (if (is-zero? b)
+        a
+        (dec (sub a (dec b))))))
+
+(define mul
+  (lambda (a b)
+    (if (is-zero? b)
+        zero
+        (add a (mul a (dec b))))))
+
+(define div
+  (lambda (a b)
+    (if (less-than? a b)
+        zero
+        (inc (div (sub a b) b)))))
+
+(define rem
+  (lambda (a b)
+    (if (less-than? a b)
+        a
+        (rem (sub a b) b))))
+
+(define exp
+  (lambda (a b)
+    (if (is-zero? b)
+        (inc zero)
+        (mul a (exp a (dec b))))))
+
+(define greater-than?
+  (lambda (a b)
+    (cond
+      ((is-zero? a) #f)
+      ((is-zero? b) #t)
+      (else (greater-than? (dec a) (dec b))))))
+
+(define less-than?
+  (lambda (a b)
+    (cond
+      ((is-zero? b) #f)
+      ((is-zero? a) #t)
+      (else (less-than? (dec a) (dec b))))))
+
+(define equal-to?
+  (lambda (a b)
+    (and (not (less-than? a b))
+         (not (greater-than? a b)))))
+
+
+;;;;;; Convert between numbers and our representation ;;;;;;
+
+(define num->rep
+  (lambda (num)
+    (if (= num 0)
+      zero
+      (inc (num->rep (- num 1))))))
+
+(define rep->num
+  (lambda (rep)
+    (if (is-zero? rep)
+      0
+      (+ 1 (rep->num (dec rep))))))
+
+;;;;;; Define some common numbers ;;;;;;
+
+(define one (inc zero))
+(define two (inc one))
+(define three (inc two))

@@ -1,0 +1,46 @@
+#lang racket
+
+; ****************************************************************************
+; SET OPERATIONS
+; (element? item set)      determines if the item is a member of the set
+; (adjoin item set)        adds the item to the set to create a new set
+; (intersection set1 set2) returns a set which contains only the items 
+;			   that are in both set1 and set2
+; (union set1 set2)        returns a set which contains all the items
+;                          that are in either set1 or set2
+; ****************************************************************************
+
+; OPTION 3: Ordered lists without duplicates
+
+(define set1 '(1 2 3 4 7))
+(define set2 '(1 4 8 9))
+
+; Worst case: look at all elements
+; Average case: look at half of elements
+(define element?
+  (lambda (item set)
+    (cond
+     ((null? set) #f)
+     ((= item (car set)) #t)
+     ((< item (car set)) #f)
+     (else (element? item (cdr set))))))
+
+; Using a similar technique to element?, complete adjoin with
+; the same worst case and average case performance as element?
+(define adjoin
+  (lambda (item set)
+    (cond ((null? set) (list item))
+          ((< (car set) item) (cons (car set) (adjoin item (cdr set))))
+          ((= item (car set)) (adjoin item (cdr set)))
+          (else (cons item set)))))
+
+(define intersection
+  (lambda (s1 s2)
+    (cond
+     ((or (null? s1) (null? s2)) '())
+     ((= (car s1) (car s2)) (cons (car s1) (intersection (cdr s1) (cdr s2))))
+     ((< (car s1) (car s2)) (intersection (cdr s1) s2))
+     (else (intersection s1 (cdr s2))))))
+
+
+; Complete union as an O(n) function

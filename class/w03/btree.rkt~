@@ -1,0 +1,107 @@
+#lang racket
+
+(require racket/trace)
+(require rackunit)
+
+;; Binary Trees
+
+(define make-tree ; makes a binary tree
+  (lambda (data left right)
+    (list left data right)))
+
+(define get-right
+  (lambda (tree)
+    (caddr tree)))
+
+(define get-left
+  (lambda (tree)
+    (car tree)))
+
+(define get-data
+  (lambda (tree)
+    (cadr tree)))
+
+(define empty-tree null)
+(define empty-tree? null?)
+
+(define tree-from-leaf
+  (lambda (data)
+    (make-tree data empty-tree empty-tree)))
+
+;;;;; ;;;;; ;;;;; ;;;;; ;;;;; ;;;;;
+
+(define insert
+  (lambda (item tree)
+    (cond ((empty-tree? tree)
+           (tree-from-leaf item))
+          ((< item (get-data tree))
+           (make-tree 
+            (get-data tree)
+            (insert item (get-left tree))
+            (get-right tree)))
+          ((> item (get-data tree))
+           (make-tree 
+            (get-data tree)
+            (get-left tree)
+            (insert item (get-right tree))))
+          (else ; item equals the data in the tree
+           tree))))
+          
+
+(define element?
+  (lambda (item tree)
+    (cond ((empty-tree? tree) #f)
+          ((= item (get-data tree)) #t)
+          ((< item (get-data tree))
+           (element? item (get-left tree)))
+          ((> item (get-data tree))
+           (element? item (get-right tree))))))
+
+
+(define list->tree
+  (lambda (lst)
+   (define list->tree-iter
+     (lambda (lst tree)
+       (cond ((null? lst) tree)
+             (else (list->tree-iter (cdr lst)
+                                    (insert tree (car lst)))))))
+    (list->tree-iter lst empty-tree)))
+
+;;;;; ;;;;; ;;;;; ;;;;; ;;;;; ;;;;;
+
+
+;; Useful binary tree functions:
+;; 1. tree-map: apply a function to every element in the tree
+;; 2. count-items: count the number of items in the tree
+;; 3. count-leaves: count the number of leaves in the tree
+;; 4. tree-height: determine the maximum height in the tree
+;; 5. tree-accumulate: similar to list accumulate but using tree nodes
+
+;; 1. tree-map: apply a function to every element in the tree
+(define tree-map
+  (lambda (fn tree)
+    #t))
+
+
+;; 2. count-items: count the number of items in the tree
+(define count-items
+  (lambda (tree)
+    #t))
+  
+;; 3. count-leaves: count the number of leaves in the tree
+(define count-leaves
+  (lambda (tree)
+    #t))
+
+;; 4. tree-height: determine the maximum height in the tree
+;; An empty-tree returns 0; a tree with just a root returns 1.
+(define tree-depth
+  (lambda (tree)
+    #t))
+
+;; 5. tree-accumulate: similar to list accumulate but using tree nodes
+(define tree-accumulate
+  (lambda (tree combiner base term)
+    #t))
+
+

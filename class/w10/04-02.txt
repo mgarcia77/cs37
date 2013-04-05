@@ -1,0 +1,41 @@
+F<flat> language
+
+CONCRETE SYNTAX
+values: booleans        True and False
+        integers        0, 1, -1, ...
+        variables
+identifiers: any valid string in Haskell
+expressions:    a value
+                e1 And e2   e1 Or e2   Not e1
+                e1 + e2   e1 - e2   e1 = e2 (eq test)
+                e1 e2 (apply function e1 to variable e2)
+                If e1 Then e2 Else e3
+                Function x -> e
+                Let Rec f x = e1
+                        In e2
+
+
+CONCRETE SYNTAX
+see labs/09/fb.hs
+
+rewriting interpreter:
+(Function x -> x + 2) (3 + 2 + 5)
+
+                         Integer 2 => Integer 2  Integer 5 => Integer 5
+                         ------------------------------------------------
+Integer 3 => Integer 3   Plus(Integer 2, Integer 5) => 2 + 5 => Integer 7
+-------------------------------------------------------------------------
+        Plus (Integer 3, Plus (Integer 2, Integer 5)) => Integer 10
+
+(Function x -> x + 2) => 10 + 2 = 12
+
+
+Free v Bound Vars
+bound variable: value dictated by another part of expression
+      Function x -> e
+        all occurrences of x in e are bound (but not necessarily to that x)
+      Let Rec f x = e1 In e2
+        all occurrences of f are bound in e1 and e2
+        all occurrences of x are bound in e1 but not e2
+free variable: not bound
+closed expression: contains no free variables
